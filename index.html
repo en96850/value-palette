@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
   <title>Value Palette</title>
   <style>
     :root {
@@ -19,6 +20,13 @@
 
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      overscroll-behavior: none;
+      touch-action: manipulation;
     }
 
     body {
@@ -180,6 +188,7 @@
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     .small-button:hover {
@@ -196,6 +205,7 @@
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
+      touch-action: manipulation;
     }
 
     .reset-button:hover {
@@ -260,13 +270,14 @@
       background: rgba(255, 250, 242, 0.72);
       border: 1px solid var(--line);
       box-shadow: 0 18px 50px var(--shadow);
+      overflow: visible;
     }
 
     .display-switch {
       position: absolute;
       top: 18px;
       right: 18px;
-      z-index: 2;
+      z-index: 4;
       display: flex;
       gap: 5px;
       padding: 5px;
@@ -290,6 +301,7 @@
       align-items: center;
       gap: 1px;
       line-height: 1.15;
+      touch-action: manipulation;
     }
 
     .display-button .jp {
@@ -315,6 +327,161 @@
       max-width: 540px;
       background: transparent;
       cursor: crosshair;
+      touch-action: none;
+    }
+
+    .touch-point {
+      display: none;
+      position: fixed;
+      z-index: 19;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 3px solid #fffaf2;
+      background: rgba(47, 36, 25, 0.55);
+      box-shadow:
+        0 0 0 2px rgba(47, 36, 25, 0.75),
+        0 8px 18px rgba(44, 36, 28, 0.28);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+    }
+
+    .touch-point.visible {
+      display: block;
+    }
+
+    .touch-bubble {
+      display: none;
+      position: fixed;
+      z-index: 20;
+      width: 214px;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(255, 250, 242, 0.98);
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 38px rgba(44, 36, 28, 0.28);
+      pointer-events: auto;
+      --tail-left: 50%;
+      --tail-top: 50%;
+    }
+
+    .touch-bubble.visible {
+      display: block;
+    }
+
+    .touch-bubble::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: rgba(255, 250, 242, 0.98);
+      transform: rotate(45deg);
+      border-bottom-right-radius: 4px;
+    }
+
+    .touch-bubble.tail-down::after {
+      left: var(--tail-left);
+      bottom: -12px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .touch-bubble.tail-up::after {
+      left: var(--tail-left);
+      top: -12px;
+      border-left: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .touch-bubble.tail-left::after {
+      left: -12px;
+      top: var(--tail-top);
+      border-left: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .touch-bubble.tail-right::after {
+      right: -12px;
+      top: var(--tail-top);
+      border-right: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .touch-bubble-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 7px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .touch-bubble-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .touch-bubble-badge {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+    }
+
+    .touch-bubble-color {
+      width: 100%;
+      height: 46px;
+      border-radius: 11px;
+      border: 1px solid rgba(44, 36, 28, 0.18);
+      position: relative;
+      z-index: 1;
+      margin-bottom: 7px;
+    }
+
+    .touch-bubble-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-family: "Consolas", "Menlo", monospace;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 8px;
+    }
+
+    .touch-bubble-main {
+      font-size: 11px;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .touch-bubble-sub {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .touch-add-button {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      background: var(--dark);
+      color: #fffaf2;
+      padding: 9px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .touch-add-button:active {
+      background: var(--accent);
     }
 
     .center-readout {
@@ -401,6 +568,7 @@
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     .tab-button.active {
@@ -445,6 +613,18 @@
       font-weight: 700;
     }
 
+    .number-control {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mobile-stepper,
+    .slider-step-button {
+      display: none;
+    }
+
     input[type="number"],
     input[type="text"] {
       width: 100%;
@@ -473,6 +653,8 @@
 
     button {
       font-family: inherit;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .main-button,
@@ -485,6 +667,7 @@
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     .main-button:hover,
@@ -523,6 +706,13 @@
       white-space: nowrap;
     }
 
+    .slider-control-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
     input[type="range"] {
       flex: 1;
       min-width: 200px;
@@ -533,6 +723,7 @@
       border: 1px solid #b8aa98;
       background: linear-gradient(to right, #151515 0%, #777777 50%, #ffffff 100%);
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     input[type="range"]::-webkit-slider-thumb {
@@ -574,8 +765,13 @@
       line-height: 1.35;
     }
 
-    #valueNumber {
+    .value-number-control {
       width: 84px;
+      flex: 0 0 auto;
+    }
+
+    #valueNumber {
+      width: 100%;
     }
 
     .save-area {
@@ -618,17 +814,22 @@
         --stack-height: auto;
       }
 
+      body {
+        padding: 16px;
+      }
+
+      .page {
+        max-width: 760px;
+      }
+
       .workspace {
         grid-template-columns: 1fr;
+        gap: 16px;
       }
 
       .side-stack,
       .control-stack {
         height: auto;
-      }
-
-      .side-stack {
-        order: 3;
       }
 
       .wheel-stack {
@@ -639,12 +840,437 @@
         order: 2;
       }
 
+      .side-stack {
+        order: 3;
+      }
+
       .wheel-wrap,
       .slider-panel,
       .number-panel,
       .control-panel {
         width: 100%;
         max-width: none;
+      }
+
+      .wheel-wrap {
+        max-width: 640px;
+        margin: 0 auto;
+      }
+
+      .side-stack {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .hover-panel,
+      .picked-panel,
+      .palette-panel {
+        flex: none;
+      }
+
+      .palette-panel {
+        grid-column: 1 / -1;
+        min-height: 220px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 6px;
+      }
+
+      .page {
+        max-width: none;
+      }
+
+      .hero {
+        margin: 0 10px 18px;
+      }
+
+      .eyebrow {
+        font-size: 10px;
+        letter-spacing: 0.16em;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .sub {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 5px;
+      }
+
+      .workspace {
+        gap: 10px;
+      }
+
+      .wheel-stack {
+        gap: 10px;
+      }
+
+      .wheel-wrap {
+        width: calc(100vw - 12px);
+        max-width: none;
+        padding: 2px;
+        border-radius: 18px;
+        aspect-ratio: auto;
+      }
+
+      canvas {
+        width: 100%;
+        max-width: none;
+      }
+
+      .display-switch {
+        top: 10px;
+        right: 10px;
+        padding: 6px;
+        gap: 6px;
+      }
+
+      .display-button {
+        min-width: 92px;
+        padding: 9px 12px 10px;
+      }
+
+      .display-button .jp {
+        font-size: 15px;
+      }
+
+      .display-button .en {
+        font-size: 10px;
+      }
+
+      .center-readout {
+        width: 100%;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .value-badge {
+        padding: 10px 16px;
+        gap: 10px;
+      }
+
+      .value-badge-label {
+        font-size: 11px;
+      }
+
+      .value-badge-num {
+        font-size: 28px;
+        min-width: 50px;
+      }
+
+      .gray-preview-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+      }
+
+      .control-stack,
+      .side-stack {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
+      .control-panel {
+        padding: 14px;
+      }
+
+      .panel-title {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .panel-note {
+        font-size: 13px;
+        margin-bottom: 12px;
+        line-height: 1.5;
+      }
+
+      .tab-buttons {
+        margin-bottom: 12px;
+      }
+
+      .tab-button {
+        padding: 13px 8px;
+        font-size: 17px;
+      }
+
+      .input-preview-layout {
+        grid-template-columns: minmax(0, 1fr) 150px;
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .field-column {
+        gap: 12px;
+      }
+
+      .field-line {
+        grid-template-columns: 24px 1fr;
+        gap: 8px;
+        font-size: 18px;
+      }
+
+      .number-control {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 92px;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .mobile-stepper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .step-button {
+        height: 50px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fffaf2;
+        color: var(--muted);
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1;
+        padding: 0;
+        cursor: pointer;
+        touch-action: manipulation;
+      }
+
+      .step-button:active {
+        background: var(--accent);
+        color: white;
+      }
+
+      input[type="number"],
+      input[type="text"] {
+        padding: 12px 12px;
+        font-size: 22px;
+        border-radius: 14px;
+      }
+
+      .preview {
+        height: 178px;
+        min-height: 178px;
+      }
+
+      .button-row {
+        margin-top: 12px;
+      }
+
+      .main-button {
+        width: 100%;
+        font-size: 16px;
+        padding: 14px 16px;
+      }
+
+      .slider-panel,
+      .number-panel {
+        padding: 14px;
+      }
+
+      .slider-track-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .slider-label {
+        font-size: 16px;
+      }
+
+      .slider-control-row {
+        display: grid;
+        grid-template-columns: 56px 1fr 56px;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .slider-step-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 56px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fffaf2;
+        color: var(--muted);
+        font-size: 28px;
+        font-weight: 700;
+        cursor: pointer;
+        touch-action: manipulation;
+      }
+
+      .slider-step-button:active {
+        background: var(--accent);
+        color: white;
+      }
+
+      input[type="range"] {
+        min-width: 0;
+        width: 100%;
+        height: 22px;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        width: 42px;
+        height: 42px;
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 42px;
+        height: 42px;
+      }
+
+      .bottom-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .number-panel {
+        flex: none;
+        max-width: none;
+        width: 100%;
+      }
+
+      .number-row {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .number-label {
+        white-space: normal;
+        font-size: 16px;
+      }
+
+      .value-number-control {
+        width: 100%;
+      }
+
+      .save-area {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .save-options {
+        left: 0;
+        margin-right: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        font-size: 15px;
+      }
+
+      .save-options label {
+        justify-content: center;
+        padding: 12px 10px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(255, 250, 242, 0.9);
+      }
+
+      .save-options input {
+        width: 22px;
+        height: 22px;
+      }
+
+      #saveButton {
+        width: 100%;
+        padding: 15px 18px;
+        font-size: 17px;
+      }
+
+      .hover-panel,
+      .picked-panel {
+        display: none;
+      }
+
+      .side-stack {
+        display: block;
+        order: 3;
+      }
+
+      .palette-panel {
+        min-height: 190px;
+        padding: 14px;
+      }
+
+      .palette-title {
+        font-size: 18px;
+      }
+
+      .palette-desc,
+      .palette-empty,
+      .palette-count {
+        font-size: 14px;
+      }
+
+      .palette-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 4px;
+      }
+
+      .hero {
+        margin: 0 9px 17px;
+      }
+
+      h1 {
+        font-size: 27px;
+      }
+
+      .wheel-wrap {
+        width: calc(100vw - 8px);
+        border-radius: 16px;
+      }
+
+      .display-button {
+        min-width: 82px;
+        padding: 8px 10px 9px;
+      }
+
+      .display-button .jp {
+        font-size: 14px;
+      }
+
+      .control-stack,
+      .side-stack {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .input-preview-layout {
+        grid-template-columns: minmax(0, 1fr) 126px;
+        gap: 10px;
+      }
+
+      .number-control {
+        grid-template-columns: minmax(0, 1fr) 84px;
+      }
+
+      .save-options {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .palette-grid {
+        grid-template-columns: repeat(4, 1fr);
       }
     }
   </style>
@@ -702,7 +1328,7 @@
       </div>
 
       <div class="wheel-stack">
-        <div class="wheel-wrap panel">
+        <div class="wheel-wrap panel" id="wheelWrap">
           <div class="display-switch">
             <button class="display-button active" data-mode="wheel">
               <span class="jp">色相環</span>
@@ -713,7 +1339,23 @@
               <span class="en">STRIP</span>
             </button>
           </div>
+
           <canvas id="canvas" width="540" height="540"></canvas>
+
+          <div id="touchPoint" class="touch-point"></div>
+
+          <div id="touchBubble" class="touch-bubble">
+            <div class="touch-bubble-head">
+              <span id="touchBubbleTitle" class="touch-bubble-title">タップしている色</span>
+              <span id="touchBubbleBadge" class="touch-bubble-badge">LIVE</span>
+            </div>
+            <div id="touchBubbleColor" class="touch-bubble-color"></div>
+            <div class="touch-bubble-info">
+              <span id="touchBubbleMain" class="touch-bubble-main">RGB(-, -, -)</span>
+              <span id="touchBubbleSub" class="touch-bubble-sub">HEX #------ / VALUE -</span>
+            </div>
+            <button id="touchAddButton" class="touch-add-button">パレットに追加</button>
+          </div>
         </div>
 
         <div class="center-readout">
@@ -741,15 +1383,35 @@
               <div class="field-column">
                 <div class="field-line">
                   <span>R</span>
-                  <input id="rInput" type="number" min="0" max="255" value="87">
+                  <div class="number-control">
+                    <input id="rInput" type="number" min="0" max="255" value="87">
+                    <div class="mobile-stepper">
+                      <button class="step-button" data-target="rInput" data-step="-1">−</button>
+                      <button class="step-button" data-target="rInput" data-step="1">＋</button>
+                    </div>
+                  </div>
                 </div>
+
                 <div class="field-line">
                   <span>G</span>
-                  <input id="gInput" type="number" min="0" max="255" value="109">
+                  <div class="number-control">
+                    <input id="gInput" type="number" min="0" max="255" value="109">
+                    <div class="mobile-stepper">
+                      <button class="step-button" data-target="gInput" data-step="-1">−</button>
+                      <button class="step-button" data-target="gInput" data-step="1">＋</button>
+                    </div>
+                  </div>
                 </div>
+
                 <div class="field-line">
                   <span>B</span>
-                  <input id="bInput" type="number" min="0" max="255" value="181">
+                  <div class="number-control">
+                    <input id="bInput" type="number" min="0" max="255" value="181">
+                    <div class="mobile-stepper">
+                      <button class="step-button" data-target="bInput" data-step="-1">−</button>
+                      <button class="step-button" data-target="bInput" data-step="1">＋</button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -766,15 +1428,35 @@
               <div class="field-column">
                 <div class="field-line">
                   <span>H</span>
-                  <input id="hInput" type="number" min="0" max="360" value="226">
+                  <div class="number-control">
+                    <input id="hInput" type="number" min="0" max="360" value="226">
+                    <div class="mobile-stepper">
+                      <button class="step-button" data-target="hInput" data-step="-1">−</button>
+                      <button class="step-button" data-target="hInput" data-step="1">＋</button>
+                    </div>
+                  </div>
                 </div>
+
                 <div class="field-line">
                   <span>S</span>
-                  <input id="sInput" type="number" min="0" max="100" value="52">
+                  <div class="number-control">
+                    <input id="sInput" type="number" min="0" max="100" value="52">
+                    <div class="mobile-stepper">
+                      <button class="step-button" data-target="sInput" data-step="-1">−</button>
+                      <button class="step-button" data-target="sInput" data-step="1">＋</button>
+                    </div>
+                  </div>
                 </div>
+
                 <div class="field-line">
                   <span>V</span>
-                  <input id="vInput" type="number" min="0" max="100" value="71">
+                  <div class="number-control">
+                    <input id="vInput" type="number" min="0" max="100" value="71">
+                    <div class="mobile-stepper">
+                      <button class="step-button" data-target="vInput" data-step="-1">−</button>
+                      <button class="step-button" data-target="vInput" data-step="1">＋</button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -807,7 +1489,11 @@
         <div class="panel slider-panel">
           <div class="slider-track-row">
             <span class="slider-label">シークバーで調整</span>
-            <input id="valueSlider" type="range" min="0" max="255" value="111">
+            <div class="slider-control-row">
+              <button class="slider-step-button" data-target="valueNumber" data-step="-1">−</button>
+              <input id="valueSlider" type="range" min="0" max="255" value="111">
+              <button class="slider-step-button" data-target="valueNumber" data-step="1">＋</button>
+            </div>
           </div>
         </div>
 
@@ -815,7 +1501,13 @@
           <div class="panel number-panel">
             <div class="number-row">
               <span class="number-label">バリューを<br>数値で指定</span>
-              <input id="valueNumber" type="number" min="0" max="255" value="111">
+              <div class="number-control value-number-control">
+                <input id="valueNumber" type="number" min="0" max="255" value="111">
+                <div class="mobile-stepper">
+                  <button class="step-button" data-target="valueNumber" data-step="-1">−</button>
+                  <button class="step-button" data-target="valueNumber" data-step="1">＋</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -834,8 +1526,18 @@
   <script>
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
+    const wheelWrap = document.getElementById("wheelWrap");
 
     const displayButtons = document.querySelectorAll(".display-button");
+
+    const touchPoint = document.getElementById("touchPoint");
+    const touchBubble = document.getElementById("touchBubble");
+    const touchBubbleTitle = document.getElementById("touchBubbleTitle");
+    const touchBubbleBadge = document.getElementById("touchBubbleBadge");
+    const touchBubbleColor = document.getElementById("touchBubbleColor");
+    const touchBubbleMain = document.getElementById("touchBubbleMain");
+    const touchBubbleSub = document.getElementById("touchBubbleSub");
+    const touchAddButton = document.getElementById("touchAddButton");
 
     const valueSlider = document.getElementById("valueSlider");
     const valueNumber = document.getElementById("valueNumber");
@@ -879,6 +1581,31 @@
     let pickedColor = null;
     let savedPalette = [];
     let displayMode = "wheel";
+    let touchDragColor = null;
+    let lastTouchX = 0;
+    let lastTouchY = 0;
+    let activeTouchId = null;
+    let repeatTimer = null;
+    let repeatInterval = null;
+    let lastTouchEndTime = 0;
+
+    function isPhoneLayout() {
+      return window.matchMedia("(max-width: 768px)").matches;
+    }
+
+    function setCanvasSizeForLayout() {
+      if (isPhoneLayout()) {
+        if (canvas.width !== 540 || canvas.height !== 680) {
+          canvas.width = 540;
+          canvas.height = 680;
+        }
+      } else {
+        if (canvas.width !== 540 || canvas.height !== 540) {
+          canvas.width = 540;
+          canvas.height = 540;
+        }
+      }
+    }
 
     function getValue(r, g, b) {
       return Math.round(0.299 * r + 0.587 * g + 0.114 * b);
@@ -1066,6 +1793,8 @@
     }
 
     function draw(targetValue) {
+      setCanvasSizeForLayout();
+
       if (displayMode === "strip") {
         drawStrip(targetValue);
       } else {
@@ -1077,8 +1806,8 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const radius = 220;
+      const centerY = isPhoneLayout() ? 420 : canvas.height / 2;
+      const radius = isPhoneLayout() ? 260 : 220;
       const grayBase = [targetValue, targetValue, targetValue];
       const anchors = createAnchors(targetValue);
 
@@ -1093,13 +1822,13 @@
         data[index + 3] = a;
       }
 
-      for (let y = centerY - radius; y <= centerY + radius; y++) {
-        for (let x = centerX - radius; x <= centerX + radius; x++) {
+      for (let y = Math.floor(centerY - radius); y <= Math.ceil(centerY + radius); y++) {
+        for (let x = Math.floor(centerX - radius); x <= Math.ceil(centerX + radius); x++) {
           const dx = x - centerX;
           const dy = y - centerY;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance <= radius) {
+          if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height && distance <= radius) {
             const saturation = distance / radius;
             let hue = Math.atan2(dy, dx) * 180 / Math.PI;
 
@@ -1122,10 +1851,10 @@
     function drawStrip(targetValue) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const left = 34;
-      const top = 58;
-      const width = 472;
-      const height = 424;
+      const left = isPhoneLayout() ? 4 : 34;
+      const top = isPhoneLayout() ? 148 : 58;
+      const width = isPhoneLayout() ? 532 : 472;
+      const height = isPhoneLayout() ? 520 : 424;
       const grayBase = [targetValue, targetValue, targetValue];
       const anchors = createAnchors(targetValue);
 
@@ -1169,14 +1898,8 @@
     function getActiveTabType() {
       const activeButton = document.querySelector(".tab-button.active");
 
-      if (activeButton.dataset.tab === "hsvPanel") {
-        return "hsv";
-      }
-
-      if (activeButton.dataset.tab === "hexPanel") {
-        return "hex";
-      }
-
+      if (activeButton.dataset.tab === "hsvPanel") return "hsv";
+      if (activeButton.dataset.tab === "hexPanel") return "hex";
       return "rgb";
     }
 
@@ -1216,10 +1939,10 @@
       hoverSampleSub.textContent = "VALUE: -";
     }
 
-    function getCanvasColorFromEvent(event) {
+    function getCanvasColorFromPoint(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
-      const x = Math.floor((event.clientX - rect.left) * canvas.width / rect.width);
-      const y = Math.floor((event.clientY - rect.top) * canvas.height / rect.height);
+      const x = Math.floor((clientX - rect.left) * canvas.width / rect.width);
+      const y = Math.floor((clientY - rect.top) * canvas.height / rect.height);
 
       if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) {
         return null;
@@ -1232,6 +1955,122 @@
       }
 
       return [pixel[0], pixel[1], pixel[2]];
+    }
+
+    function getCanvasColorFromEvent(event) {
+      return getCanvasColorFromPoint(event.clientX, event.clientY);
+    }
+
+    function showTouchPoint(clientX, clientY) {
+      touchPoint.style.left = clientX + "px";
+      touchPoint.style.top = clientY + "px";
+      touchPoint.classList.add("visible");
+    }
+
+    function hideTouchPoint() {
+      touchPoint.classList.remove("visible");
+    }
+
+    function showTouchBubble(clientX, clientY, color, isFixed) {
+      const bubbleWidth = 214;
+      const bubbleHeight = 126;
+      const margin = 8;
+      const gap = 30;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let placement = "above";
+
+      if (clientY - bubbleHeight - gap < margin) {
+        placement = "below";
+      } else if (clientX + bubbleWidth + gap < viewportWidth && clientX < bubbleWidth / 2 + margin) {
+        placement = "right";
+      } else if (clientX - bubbleWidth - gap > margin && clientX > viewportWidth - bubbleWidth / 2 - margin) {
+        placement = "left";
+      }
+
+      let left = clientX - bubbleWidth / 2;
+      let top = clientY - bubbleHeight - gap;
+
+      if (placement === "below") {
+        left = clientX - bubbleWidth / 2;
+        top = clientY + gap;
+      }
+
+      if (placement === "right") {
+        left = clientX + gap;
+        top = clientY - bubbleHeight / 2;
+      }
+
+      if (placement === "left") {
+        left = clientX - bubbleWidth - gap;
+        top = clientY - bubbleHeight / 2;
+      }
+
+      left = Math.max(margin, Math.min(left, viewportWidth - bubbleWidth - margin));
+      top = Math.max(margin, Math.min(top, viewportHeight - bubbleHeight - margin));
+
+      const tailLeft = Math.max(22, Math.min(clientX - left, bubbleWidth - 22));
+      const tailTop = Math.max(22, Math.min(clientY - top, bubbleHeight - 22));
+
+      touchBubble.classList.remove("tail-up", "tail-down", "tail-left", "tail-right");
+
+      if (placement === "above") {
+        touchBubble.classList.add("tail-down");
+        touchBubble.style.setProperty("--tail-left", tailLeft + "px");
+      }
+
+      if (placement === "below") {
+        touchBubble.classList.add("tail-up");
+        touchBubble.style.setProperty("--tail-left", tailLeft + "px");
+      }
+
+      if (placement === "right") {
+        touchBubble.classList.add("tail-left");
+        touchBubble.style.setProperty("--tail-top", tailTop + "px");
+      }
+
+      if (placement === "left") {
+        touchBubble.classList.add("tail-right");
+        touchBubble.style.setProperty("--tail-top", tailTop + "px");
+      }
+
+      touchBubble.style.left = left + "px";
+      touchBubble.style.top = top + "px";
+
+      const r = color[0];
+      const g = color[1];
+      const b = color[2];
+      const value = getValue(r, g, b);
+
+      touchBubbleTitle.textContent = isFixed ? "タップした色" : "タップしている色";
+      touchBubbleBadge.textContent = isFixed ? "PICK" : "LIVE";
+      touchBubbleColor.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+      touchBubbleMain.textContent = `RGB(${r}, ${g}, ${b})`;
+      touchBubbleSub.textContent = `${rgbToHex(r, g, b)} / VALUE ${value}`;
+
+      touchBubble.classList.add("visible");
+    }
+
+    function hideTouchBubble() {
+      touchBubble.classList.remove("visible");
+      hideTouchPoint();
+    }
+
+    function handleTouchAt(clientX, clientY, isFixed) {
+      const color = getCanvasColorFromPoint(clientX, clientY);
+
+      if (color === null) {
+        return;
+      }
+
+      lastTouchX = clientX;
+      lastTouchY = clientY;
+      touchDragColor = color;
+
+      updateSample(hoverSampleBox, hoverSampleMain, hoverSampleSub, color);
+      showTouchPoint(clientX, clientY);
+      showTouchBubble(clientX, clientY, color, isFixed);
     }
 
     function renderPalette() {
@@ -1253,6 +2092,13 @@
         swatch.title = `${rgbToHex(color[0], color[1], color[2])} / VALUE ${getValue(color[0], color[1], color[2])}`;
         paletteGrid.appendChild(swatch);
       });
+    }
+
+    function addPickedColorToPalette() {
+      if (pickedColor === null) return;
+
+      savedPalette.push([pickedColor[0], pickedColor[1], pickedColor[2]]);
+      renderPalette();
     }
 
     function canvasToBlob(targetCanvas) {
@@ -1415,7 +2261,6 @@
       vInput.value = v;
 
       const rgb = hsvPercentToRgb(h, s, v);
-
       hsvPreview.style.backgroundColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
     }
 
@@ -1455,6 +2300,52 @@
       }
     }
 
+    function changeNumberValue(targetId, step) {
+      const target = document.getElementById(targetId);
+      const min = Number(target.min || 0);
+      const max = Number(target.max || 255);
+      const current = Number(target.value);
+      const next = clamp(current + step, min, max);
+
+      target.value = next;
+      target.dispatchEvent(new Event("input", { bubbles: true }));
+
+      if (target.id === "valueNumber") {
+        updateValue(target.value);
+      }
+
+      hideTouchBubble();
+    }
+
+    function stopRepeat() {
+      clearTimeout(repeatTimer);
+      clearInterval(repeatInterval);
+      repeatTimer = null;
+      repeatInterval = null;
+    }
+
+    document.addEventListener("gesturestart", function (event) {
+      event.preventDefault();
+    });
+
+    document.addEventListener("gesturechange", function (event) {
+      event.preventDefault();
+    });
+
+    document.addEventListener("gestureend", function (event) {
+      event.preventDefault();
+    });
+
+    document.addEventListener("touchend", function (event) {
+      const now = Date.now();
+
+      if (now - lastTouchEndTime <= 320) {
+        event.preventDefault();
+      }
+
+      lastTouchEndTime = now;
+    }, { passive: false });
+
     document.querySelectorAll(".tab-button").forEach(function (button) {
       button.addEventListener("click", function () {
         switchTab(button.dataset.tab);
@@ -1467,10 +2358,13 @@
         updateDisplayButtons();
         updateValue(valueNumber.value);
         resetHoverSample();
+        hideTouchBubble();
       });
     });
 
     canvas.addEventListener("mousemove", function (event) {
+      if (isPhoneLayout()) return;
+
       const color = getCanvasColorFromEvent(event);
 
       if (color === null) {
@@ -1482,27 +2376,79 @@
     });
 
     canvas.addEventListener("mouseleave", function () {
+      if (isPhoneLayout()) return;
       resetHoverSample();
     });
 
     canvas.addEventListener("click", function (event) {
+      if (isPhoneLayout()) return;
+
       const color = getCanvasColorFromEvent(event);
 
-      if (color === null) {
-        return;
-      }
+      if (color === null) return;
 
       pickedColor = color;
       updateSample(pickedSampleBox, pickedSampleMain, pickedSampleSub, pickedColor);
     });
 
-    addPaletteButton.addEventListener("click", function () {
-      if (pickedColor === null) {
-        return;
+    canvas.addEventListener("touchstart", function (event) {
+      if (!isPhoneLayout()) return;
+
+      event.preventDefault();
+
+      const touch = event.changedTouches[0];
+      activeTouchId = touch.identifier;
+
+      handleTouchAt(touch.clientX, touch.clientY, false);
+    }, { passive: false });
+
+    canvas.addEventListener("touchmove", function (event) {
+      if (!isPhoneLayout()) return;
+
+      event.preventDefault();
+
+      let touch = event.changedTouches[0];
+
+      for (let i = 0; i < event.changedTouches.length; i++) {
+        if (event.changedTouches[i].identifier === activeTouchId) {
+          touch = event.changedTouches[i];
+          break;
+        }
       }
 
-      savedPalette.push([pickedColor[0], pickedColor[1], pickedColor[2]]);
-      renderPalette();
+      handleTouchAt(touch.clientX, touch.clientY, false);
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", function (event) {
+      if (!isPhoneLayout()) return;
+
+      event.preventDefault();
+
+      if (touchDragColor !== null) {
+        pickedColor = [touchDragColor[0], touchDragColor[1], touchDragColor[2]];
+        updateSample(pickedSampleBox, pickedSampleMain, pickedSampleSub, pickedColor);
+        showTouchPoint(lastTouchX, lastTouchY);
+        showTouchBubble(lastTouchX, lastTouchY, pickedColor, true);
+      }
+
+      activeTouchId = null;
+    }, { passive: false });
+
+    canvas.addEventListener("touchcancel", function () {
+      activeTouchId = null;
+    }, { passive: false });
+
+    touchAddButton.addEventListener("touchstart", function (event) {
+      event.stopPropagation();
+    }, { passive: false });
+
+    touchAddButton.addEventListener("click", function (event) {
+      event.stopPropagation();
+      addPickedColorToPalette();
+    });
+
+    addPaletteButton.addEventListener("click", function () {
+      addPickedColorToPalette();
     });
 
     resetPaletteButton.addEventListener("click", function () {
@@ -1557,19 +2503,40 @@
 
     valueSlider.addEventListener("input", function () {
       updateValue(valueSlider.value);
+      hideTouchBubble();
     });
 
     valueNumber.addEventListener("input", function () {
       updateValue(valueNumber.value);
+      hideTouchBubble();
+    });
+
+    document.querySelectorAll(".step-button, .slider-step-button").forEach(function (button) {
+      button.addEventListener("pointerdown", function (event) {
+        event.preventDefault();
+
+        const targetId = button.dataset.target;
+        const step = Number(button.dataset.step);
+
+        changeNumberValue(targetId, step);
+
+        repeatTimer = setTimeout(function () {
+          repeatInterval = setInterval(function () {
+            changeNumberValue(targetId, step);
+          }, 80);
+        }, 420);
+      });
+
+      button.addEventListener("pointerup", stopRepeat);
+      button.addEventListener("pointerleave", stopRepeat);
+      button.addEventListener("pointercancel", stopRepeat);
     });
 
     document.getElementById("saveButton").addEventListener("click", async function () {
       const saveDisplay = saveDisplayCheck.checked;
       const savePalette = savePaletteCheck.checked;
 
-      if (!saveDisplay && !savePalette) {
-        return;
-      }
+      if (!saveDisplay && !savePalette) return;
 
       if (saveDisplay && savePalette) {
         await saveCanvasAsPng(createCombinedCanvas(), "value-display-and-palette.png");
@@ -1584,6 +2551,11 @@
       if (savePalette) {
         await saveCanvasAsPng(createPaletteCanvas(), "value-palette.png");
       }
+    });
+
+    window.addEventListener("resize", function () {
+      updateValue(valueNumber.value);
+      hideTouchBubble();
     });
 
     updateDisplayButtons();

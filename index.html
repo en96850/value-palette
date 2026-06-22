@@ -1588,9 +1588,47 @@
     let repeatTimer = null;
     let repeatInterval = null;
     let lastTouchEndTime = 0;
+    let currentValue255 = 111;
 
     function isPhoneLayout() {
       return window.matchMedia("(max-width: 768px)").matches;
+    }
+
+    function isHsvValueMode() {
+      const activeButton = document.querySelector(".tab-button.active");
+      return activeButton && activeButton.dataset.tab === "hsvPanel";
+    }
+
+    function getDisplayValueMax() {
+      return isHsvValueMode() ? 100 : 255;
+    }
+
+    function value255ToDisplayValue(value255) {
+      value255 = clampByte(value255);
+
+      if (isHsvValueMode()) {
+        return Math.round(value255 / 255 * 100);
+      }
+
+      return value255;
+    }
+
+    function displayValueToValue255(displayValue) {
+      if (isHsvValueMode()) {
+        const value100 = clamp(displayValue, 0, 100);
+        return Math.round(value100 / 100 * 255);
+      }
+
+      return clampByte(displayValue);
+    }
+
+    function syncValueDisplay() {
+      const displayMax = getDisplayValueMax();
+      const displayValue = value255ToDisplayValue(currentValue255);
+
+      valueNumber.max = displayMax;
+      valueNumber.value = displayValue;
+      readoutNum.textContent = displayValue;
     }
 
     function setCanvasSizeForLayout() {
@@ -1921,6 +1959,10 @@
       return `RGB(${r}, ${g}, ${b})`;
     }
 
+    function formatDisplayValueText(value255) {
+      return String(value255ToDisplayValue(value255));
+    }
+
     function updateSample(box, main, sub, color) {
       const r = color[0];
       const g = color[1];
@@ -1929,7 +1971,7 @@
 
       box.style.background = `rgb(${r}, ${g}, ${b})`;
       main.textContent = formatColorForActiveTab(color);
-      sub.textContent = `VALUE: ${value}`;
+      sub.textContent = `VALUE: ${formatDisplayValueText(value)}`;
     }
 
     function resetHoverSample() {
@@ -1939,10 +1981,27 @@
       hoverSampleSub.textContent = "VALUE: -";
     }
 
-    function getCanvasColorFromPoint(clientX, clientY) {
+    function getCanvasPointFromClient(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
-      const x = Math.floor((clientX - rect.left) * canvas.width / rect.width);
-      const y = Math.floor((clientY - rect.top) * canvas.height / rect.height);
+
+      return {
+        x: (clientX - rect.left) * canvas.width / rect.width,
+        y: (clientY - rect.top) * canvas.height / rect.height
+      };
+    }
+
+    function getClientPointFromCanvasPoint(canvasX, canvasY) {
+      const rect = canvas.getBoundingClientRect();
+
+      return {
+        x: rect.left + canvasX * rect.width / canvas.width,
+        y: rect.top + canvasY * rect.height / canvas.height
+      };
+    }
+
+    function getPixelColorFromCanvasPoint(canvasX, canvasY) {
+      const x = Math.floor(canvasX);
+      const y = Math.floor(canvasY);
 
       if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) {
         return null;
@@ -1957,8 +2016,75 @@
       return [pixel[0], pixel[1], pixel[2]];
     }
 
+    function getCanvasColorFromPoint(clientX, clientY) {
+      const point = getCanvasPointFromClient(clientX, clientY);
+      return getPixelColorFromCanvasPoint(point.x, point.y);
+    }
+
     function getCanvasColorFromEvent(event) {
       return getCanvasColorFromPoint(event.clientX, event.clientY);
+    }
+
+    function getSmartTouchSelection(clientX, clientY, shouldClamp) {
+      const point = getCanvasPointFromClient(clientX, clientY);
+      let canvasX = point.x;
+      let canvasY = point.y;
+
+      if (displayMode === "wheel") {
+        const centerX = canvas.width / 2;
+        const centerY = isPhoneLayout() ? 420 : canvas.height / 2;
+        const radius = isPhoneLayout() ? 260 : 220;
+
+        const dx = canvasX - centerX;
+        const dy = canvasY - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > radius) {
+          if (!shouldClamp) {
+            return null;
+          }
+
+          const angle = Math.atan2(dy, dx);
+          canvasX = centerX + Math.cos(angle) * radius;
+          canvasY = centerY + Math.sin(angle) * radius;
+        }
+      } else {
+        const left = isPhoneLayout() ? 4 : 34;
+        const top = isPhoneLayout() ? 148 : 58;
+        const width = isPhoneLayout() ? 532 : 472;
+        const height = isPhoneLayout() ? 520 : 424;
+        const right = left + width - 1;
+        const bottom = top + height - 1;
+
+        const inside =
+          canvasX >= left &&
+          canvasX <= right &&
+          canvasY >= top &&
+          canvasY <= bottom;
+
+        if (!inside) {
+          if (!shouldClamp) {
+            return null;
+          }
+
+          canvasX = Math.max(left, Math.min(canvasX, right));
+          canvasY = Math.max(top, Math.min(canvasY, bottom));
+        }
+      }
+
+      const color = getPixelColorFromCanvasPoint(canvasX, canvasY);
+
+      if (color === null) {
+        return null;
+      }
+
+      const clientPoint = getClientPointFromCanvasPoint(canvasX, canvasY);
+
+      return {
+        color: color,
+        clientX: clientPoint.x,
+        clientY: clientPoint.y
+      };
     }
 
     function showTouchPoint(clientX, clientY) {
@@ -2047,7 +2173,7 @@
       touchBubbleBadge.textContent = isFixed ? "PICK" : "LIVE";
       touchBubbleColor.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
       touchBubbleMain.textContent = `RGB(${r}, ${g}, ${b})`;
-      touchBubbleSub.textContent = `${rgbToHex(r, g, b)} / VALUE ${value}`;
+      touchBubbleSub.textContent = `${rgbToHex(r, g, b)} / VALUE ${formatDisplayValueText(value)}`;
 
       touchBubble.classList.add("visible");
     }
@@ -2057,20 +2183,22 @@
       hideTouchPoint();
     }
 
-    function handleTouchAt(clientX, clientY, isFixed) {
-      const color = getCanvasColorFromPoint(clientX, clientY);
+    function handleTouchAt(clientX, clientY, isFixed, shouldClamp) {
+      const selection = getSmartTouchSelection(clientX, clientY, shouldClamp);
 
-      if (color === null) {
-        return;
+      if (selection === null) {
+        return false;
       }
 
-      lastTouchX = clientX;
-      lastTouchY = clientY;
-      touchDragColor = color;
+      lastTouchX = selection.clientX;
+      lastTouchY = selection.clientY;
+      touchDragColor = selection.color;
 
-      updateSample(hoverSampleBox, hoverSampleMain, hoverSampleSub, color);
-      showTouchPoint(clientX, clientY);
-      showTouchBubble(clientX, clientY, color, isFixed);
+      updateSample(hoverSampleBox, hoverSampleMain, hoverSampleSub, selection.color);
+      showTouchPoint(selection.clientX, selection.clientY);
+      showTouchBubble(selection.clientX, selection.clientY, selection.color, isFixed);
+
+      return true;
     }
 
     function renderPalette() {
@@ -2089,7 +2217,7 @@
         const swatch = document.createElement("div");
         swatch.className = "palette-swatch";
         swatch.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-        swatch.title = `${rgbToHex(color[0], color[1], color[2])} / VALUE ${getValue(color[0], color[1], color[2])}`;
+        swatch.title = `${rgbToHex(color[0], color[1], color[2])} / VALUE ${formatDisplayValueText(getValue(color[0], color[1], color[2]))}`;
         paletteGrid.appendChild(swatch);
       });
     }
@@ -2225,14 +2353,14 @@
     }
 
     function updateValue(value) {
-      const targetValue = clampByte(value);
+      currentValue255 = clampByte(value);
 
-      valueSlider.value = targetValue;
-      valueNumber.value = targetValue;
-      readoutNum.textContent = targetValue;
-      grayPreview.style.backgroundColor = `rgb(${targetValue}, ${targetValue}, ${targetValue})`;
+      valueSlider.value = currentValue255;
+      syncValueDisplay();
 
-      draw(targetValue);
+      grayPreview.style.backgroundColor = `rgb(${currentValue255}, ${currentValue255}, ${currentValue255})`;
+
+      draw(currentValue255);
 
       if (pickedColor !== null) {
         updateSample(pickedSampleBox, pickedSampleMain, pickedSampleSub, pickedColor);
@@ -2295,13 +2423,30 @@
         }
       });
 
+      syncValueDisplay();
+
       if (pickedColor !== null) {
         updateSample(pickedSampleBox, pickedSampleMain, pickedSampleSub, pickedColor);
+      }
+
+      renderPalette();
+
+      if (touchDragColor !== null && touchBubble.classList.contains("visible")) {
+        showTouchBubble(lastTouchX, lastTouchY, touchDragColor, pickedColor !== null);
       }
     }
 
     function changeNumberValue(targetId, step) {
       const target = document.getElementById(targetId);
+
+      if (target.id === "valueNumber") {
+        const currentDisplayValue = value255ToDisplayValue(currentValue255);
+        const nextDisplayValue = clamp(currentDisplayValue + step, 0, getDisplayValueMax());
+        updateValue(displayValueToValue255(nextDisplayValue));
+        hideTouchBubble();
+        return;
+      }
+
       const min = Number(target.min || 0);
       const max = Number(target.max || 255);
       const current = Number(target.value);
@@ -2309,10 +2454,6 @@
 
       target.value = next;
       target.dispatchEvent(new Event("input", { bubbles: true }));
-
-      if (target.id === "valueNumber") {
-        updateValue(target.value);
-      }
 
       hideTouchBubble();
     }
@@ -2356,7 +2497,7 @@
       button.addEventListener("click", function () {
         displayMode = button.dataset.mode;
         updateDisplayButtons();
-        updateValue(valueNumber.value);
+        updateValue(currentValue255);
         resetHoverSample();
         hideTouchBubble();
       });
@@ -2397,13 +2538,21 @@
       event.preventDefault();
 
       const touch = event.changedTouches[0];
-      activeTouchId = touch.identifier;
+      const started = handleTouchAt(touch.clientX, touch.clientY, false, false);
 
-      handleTouchAt(touch.clientX, touch.clientY, false);
+      if (!started) {
+        activeTouchId = null;
+        touchDragColor = null;
+        hideTouchBubble();
+        return;
+      }
+
+      activeTouchId = touch.identifier;
     }, { passive: false });
 
     canvas.addEventListener("touchmove", function (event) {
       if (!isPhoneLayout()) return;
+      if (activeTouchId === null) return;
 
       event.preventDefault();
 
@@ -2416,11 +2565,12 @@
         }
       }
 
-      handleTouchAt(touch.clientX, touch.clientY, false);
+      handleTouchAt(touch.clientX, touch.clientY, false, true);
     }, { passive: false });
 
     canvas.addEventListener("touchend", function (event) {
       if (!isPhoneLayout()) return;
+      if (activeTouchId === null) return;
 
       event.preventDefault();
 
@@ -2507,7 +2657,7 @@
     });
 
     valueNumber.addEventListener("input", function () {
-      updateValue(valueNumber.value);
+      updateValue(displayValueToValue255(valueNumber.value));
       hideTouchBubble();
     });
 
@@ -2554,7 +2704,7 @@
     });
 
     window.addEventListener("resize", function () {
-      updateValue(valueNumber.value);
+      updateValue(currentValue255);
       hideTouchBubble();
     });
 

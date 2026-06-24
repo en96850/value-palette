@@ -142,24 +142,24 @@
     }
 
     .sample-panel {
-      padding: 14px;
+      padding: 13px;
       min-height: 0;
       display: flex;
       flex-direction: column;
     }
 
     .hover-panel {
-      flex: 0 0 170px;
+      flex: 0 0 166px;
     }
 
     .picked-panel {
-      flex: 0 0 210px;
+      flex: 0 0 204px;
     }
 
     .palette-panel {
       flex: 1;
       min-height: 0;
-      padding: 14px;
+      padding: 13px;
       display: flex;
       flex-direction: column;
     }
@@ -169,7 +169,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       gap: 8px;
     }
 
@@ -199,7 +199,7 @@
     }
 
     .sample-info {
-      margin-top: 8px;
+      margin-top: 7px;
       display: flex;
       flex-direction: column;
       gap: 3px;
@@ -207,7 +207,7 @@
       font-size: 12px;
       line-height: 1.35;
       font-family: "Consolas", "Menlo", monospace;
-      min-height: 40px;
+      min-height: 38px;
     }
 
     .sample-main {
@@ -217,7 +217,7 @@
     }
 
     .add-palette-row {
-      margin-top: 8px;
+      margin-top: 7px;
       display: flex;
       justify-content: flex-end;
     }
@@ -264,10 +264,10 @@
     }
 
     .palette-desc {
-      margin: 0 0 10px;
+      margin: 0 0 8px;
       color: var(--muted);
       font-size: 12px;
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
     .palette-grid {
@@ -277,6 +277,13 @@
       align-content: start;
       flex: 1;
       overflow: hidden;
+    }
+
+    .palette-footer {
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+      margin-top: 8px;
     }
 
     .palette-swatch {
@@ -1279,6 +1286,10 @@
         font-size: 14px;
       }
 
+      .palette-footer {
+        margin-top: 10px;
+      }
+
       .palette-grid {
         grid-template-columns: repeat(5, 1fr);
       }
@@ -1396,12 +1407,14 @@
             <div class="palette-title" data-i18n="savedPalette">保存パレット</div>
             <div class="palette-actions">
               <div id="paletteCount" class="palette-count">0色</div>
-              <button id="resetPaletteButton" class="reset-button" data-i18n="reset">リセット</button>
             </div>
           </div>
           <p class="palette-desc" data-i18n="paletteDesc">固定した色を追加すると、ここに保存されます。</p>
           <div id="paletteGrid" class="palette-grid">
             <div class="palette-empty" data-i18n="paletteEmpty">まだ色がありません。</div>
+          </div>
+          <div class="palette-footer">
+            <button id="resetPaletteButton" class="reset-button" data-i18n="reset">リセット</button>
           </div>
         </div>
       </div>
